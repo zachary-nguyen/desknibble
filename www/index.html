@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" charset="utf-8"></script>
+    <meta charset="utf-8">
+    <title>DESK NIBBLE</title>
+  </head>
+  <body>
+    <table id="resultTable" style= "width:100%">
+    </table>
+  </body>
+
+  <script type="text/javascript">
+    $( document ).ready(function() {
+
+      var client, product;
+      var result = [];
+      var totalCost = 0;
+      $.when(
+        $.getJSON("https://s3.amazonaws.com/misc-file-snack/MOCK_SNACKER_DATA.json",function(data){
+          client = data;
+        }),
+        $.getJSON("https://ca.desknibbles.com/collections/items.oembed",function(data){
+          product = data.products;
+        })
+      ).then(function(){
+        filterAndSum();
+        displayResult();
+      });
+
+      function filterAndSum(){
+        var item
+        $.each(client,function(i,person){
+          $.each(product,function(x,item){
+            if(person.fave_snack == item.title){
+              result.push(person);
+              totalCost += item.offers[0].price;
+            }
+          });
+        });
+      }
+
+      function displayResult(){
+
+        var table = document.getElementById("resultTable");
+        for(var i = 0; i<result.length; i++){
+          var tr = document.createElement("tr");
+          var td = document.createElement("td");
+          var txt = document.createTextNode("Email: " + result[i].email + " - Favorite Snack: " + result[i].fave_snack);
+
+          td.appendChild(txt);
+          tr.appendChild(td);
+          table.appendChild(tr);
+        }
+
+        var paragraph = document.createElement("p");
+        var displayAmount = document.createTextNode("The total cost for all clients is : " + totalCost + "$");
+        document.body.appendChild(displayAmount);
+
+      }
+
+    });
+  </script>
+
+</html>
